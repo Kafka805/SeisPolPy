@@ -7,6 +7,7 @@ from scipy.signal.windows import tukey
 from .filtermerge import filtermerge
 from .eigen_analysis import eigen_analysis
 from .polarity import polarity
+from .dStruct import dataStruct
 
 def analyze(st: Stream, window_size:int, window_overlap:float = 0.5, 
             scope:tuple = None, write:bool = False) -> pd.DataFrame:
@@ -21,8 +22,8 @@ def analyze(st: Stream, window_size:int, window_overlap:float = 0.5,
     """
     #Guard Clause
     if len(st) != 3:
-        raise ValueError(f"Expected stream object of size 3, received"
-                         " {len(st)}.")
+        raise ValueError(f"""Expected stream object of size 3, received
+                          {len(st)}.""")
     
     # Utilize filtermerge to perform pre-processing
     working_signal = filtermerge(st)
@@ -36,25 +37,13 @@ def analyze(st: Stream, window_size:int, window_overlap:float = 0.5,
     numsOut:int = st[0].stats.npts // step
 
     # Initialize output datastructure
-    dataDummy = np.full((numsOut, 5), np.nan)
-
-    dataNames = [
-        'Rectilinearity',
-        'Planarity',
-        'Azimuth',
-        'Incident',
-        'Normalized Diff'
-    ]
+    dataSet = dataStruct(length = numsOut)
     
-    dataSet = pd.DataFrame(dataDummy, columns = dataNames)
-
     # Construct the tukey window envelope
     cTW = tukey(window_size, 0.5)
 
     # Compute polarity metrics for each window
     working_data = np.vstack([tr.data for tr in working_signal])
-    
-    dataSet = pd.DataFrame(columns=dataNames, index=range(numsOut))
 
     for i in range(numsOut):
         try:
@@ -68,7 +57,7 @@ def analyze(st: Stream, window_size:int, window_overlap:float = 0.5,
     
             eVals, eVecs = eigen_analysis(window1, window2, window3)
             dataPass = polarity(eVecs, eVals)
-            dataSet.iloc[i] = dataPass
+            dataSet.body.iloc[i] = dataPass
         except ValueError:
             pass
         # The final portion raises an error because there aren't enough samples.
@@ -78,8 +67,7 @@ def analyze(st: Stream, window_size:int, window_overlap:float = 0.5,
     if write is True:
         dataSet.to_csv(os.getcwd())
 
-    return dataSet
-
+    return dataSet.body
 
 #def main(kwargs: dict) -> None:
 #   SeisPol(**kwargs)

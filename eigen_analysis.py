@@ -40,3 +40,16 @@ def eigen_analysis(arr1: npt.ArrayLike,
     sorted_eVecs = eVecs[:, sorted_indices]
     
     return sorted_eVals, sorted_eVecs
+
+def main(**kwargs):
+    # NIST Test Data 
+    #[https://www.itl.nist.gov/div898/handbook/pmc/section5/pmc5.htm]
+    
+    a = [4.0, 4.2, 3.9, 4.3, 4.1]
+    b = [2.0, 2.1, 2.0, 2.1, 2.2]
+    c = [0.6, 0.59, 0.58, 0.62, 0.63]
+    vals, vecs = eigen_analysis(a, b, c)
+    
+    
+if __name__ == '__main__':
+    main()
