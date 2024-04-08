@@ -1,13 +1,18 @@
-# -*- coding: utf-8 -*-
 """
-Created on Sun Apr  7 13:43:36 2024
-
 @author: Austin Abreu
 """
 import numpy as np
 import pandas as pd
     
 class dataStruct:
+    """
+    Wrapper for data structure creation utilizing pandas DataFrames. Designed
+    for use with SeisPol.
+    
+    Initalizing Variables:
+        headers (list[str]): A list containing column names.
+        length (int): Integer number describing how many rows to initialize.
+    """
     def __init__(self, headers: list[str] = None, 
                  length: int = None):
         if headers is None:
@@ -30,8 +35,7 @@ class dataStruct:
         
     def __str__(self) -> str:
         return f"{self.body}"
-    
-        
+
 def main():
     pass
     
