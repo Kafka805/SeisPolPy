@@ -30,8 +30,9 @@ class dataStruct:
         self.length = length
         
         if length == 1:
-            self.body = pd.Series(dict(headers))
-        self.body = pd.DataFrame(columns=headers, index=range(length))
+            self.body = pd.Series(index=headers)
+        else:
+            self.body = pd.DataFrame(columns=headers, index=range(length))
         
     def __str__(self) -> str:
         return f"{self.body}"

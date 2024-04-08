@@ -1,24 +1,101 @@
-# -*- coding: utf-8 -*-
 """
-Created on Sun Apr  7 10:47:48 2024
-
 @author: Austin Abreu
 """
+
 import numpy as np
+import numpy.typing as npt
 from obspy import Stream, Trace
 from obspy.signal.detrend import simple
 from scipy.signal import butter, filtfilt
+
 #%%
-def filtermerge(st, corner_l=2, corner_h=8, order=1):
+def butterworth(data, dt, corner_l, corner_h, order) -> npt.ArrayLike:
     """
-    Pre-processing for seismic data streams and traces. Designed for calls from
-    SeisPol in mind.
+    Signal processing function that performs a butterworth filtering method on
+    the input signal.
+    Designed for calls from SeisPol, for use in the pre-processing package.
+    """ 
+    # Butterworth filter parameters
+    nyquist = 0.5 / dt
+    low = corner_l / nyquist
+    high = corner_h / nyquist
+    b, a = butter(order, [low, high], btype='band', analog=False)
+    
+    return filtfilt(b, a, data)
+
+def trimPad(tr, start, end) -> npt.ArrayLike:
+    """
+    Identifies the earliest time and latest times embedded in the stream, then
+    trims, or pads the data with zeros, to these times using np.pad.
+    
+    """
+    start_offset = (tr.stats.starttime - start) \
+        * tr.stats.sampling_rate
+    endOffset = (end - tr.stats.endtime) * tr.stats.sampling_rate
+    
+    editedData = np.pad(tr.data, (int(start_offset), int(endOffset)),
+                         mode='constant', constant_values = 0)
+    
+    return editedData
+
+def statsPull(st) -> dict:
+    """
+    Extract relevant metadata from traces.
+    
+    Inputs:
+    st : Obspy stream object containing traces. Traces should be from the same
+            source.
+    
+    Ouputs:
+    out (dict): a dictionary containing
+                    SR : the sampling rate of the traces
+                    Start : the earliest timestamp from the stream
+                    End : the latest timestap from the stream
+    
+    """
+    if len({tr.stats.sampling_rate for tr in st}) > 1:
+        raise ValueError("Error in Filtermerge(statsPull): The input traces "
+                         "have different sampling rates.")
+    
+    
+    dt = st[0].stats.delta
+    
+    # Initialize container dictionaries
+    startTimes = []
+    endTimes = []
+    
+    # Find the start/end times embedded in the traces.
+    # This is somewhat redundant, assuming you've ensured your data quality.
+    for tr in st:
+        startTimes.append(tr.stats.starttime)
+        endTimes.append(tr.stats.endtime)
+        
+    if (startTimes[0] == startTimes[1] == startTimes[2]) is False:
+        raise ValueError("Error in FilterMerge(statsPull):"
+                         "The trace start times are different.")
+    if (endTimes[0] == endTimes[1] == endTimes[2]) is False:
+        raise ValueError("Error in FilterMerge(statsPull):"
+                         "The trace end times are different.") 
+        
+    earliestStart = min(startTimes)
+    latestEnd = max(endTimes)
+    
+    return {'sr': dt, 'Start': earliestStart, 'End': latestEnd}
+
+#%%
+def filtermerge(working_st, corner_l=2, corner_h=8, order=1) -> Stream:
+    """
+    Handler function for pre-processing for seismic data streams and traces. 
+    Designed for calls from SeisPol.
 
     Parameters:
     st (obspy.Stream): Seismic data stream containing traces
-    corner_l (float): Low corner frequency for the bandpass filter (default: 2 Hz)
-    corner_h (float): High corner frequency for the bandpass filter (default: 8 Hz)
-    order (int): Order of the Butterworth filter (default: 1)
+    corner_l (float): Low corner frequency for the bandpass filter
+                        (default: 2 Hz). Passed to 'butterworth.'
+    corner_h (float): High corner frequency for the bandpass filter
+                        (default: 8 Hz. Passed to 'butterworth.'
+    order (int): Order of the Butterworth filter (default: 1).
+                    Passed to 'butterworth.'
 
     Returns:
     obspy.Stream: Filtered and merged stream
@@ -26,49 +103,33 @@ def filtermerge(st, corner_l=2, corner_h=8, order=1):
 
     # Guard Clause to ensure each trace is from the same station, and that each
     # trace has the same sampling rate.
-    if isinstance(st, Stream) is False:
-        st_type = type(st).__name__
+    if isinstance(working_st, Stream) is False:
+        input_type = type(working_st).__name__
         raise TypeError(f"Error in Filtermerge: Expected stream object as"
-                        " input, but received {st_type}.")
-
-    if len({tr.stats.sampling_rate for tr in st}) > 1:
-        raise ValueError("Error in Filtermerge: The input traces have "
-                         "different sampling rates.")
- 
-    # Extract sampling rate from traces
-    dt = st[0].stats.delta
-
+                        " input, but received {input_type}.")
+    
+    #Retrieve relevant metadata
+    metaData = statsPull(working_st)
+    
     # Create a new stream to store the filtered traces
     filtered_st = Stream()
-
-    # Find the earliest start time and latest end time across all traces
-    start_times = [tr.stats.starttime for tr in st]
-    end_times = [tr.stats.endtime for tr in st]
-    earliest_start = min(start_times)
-    latest_end = max(end_times)
-
-    for tr in st:
-  # Trim or pad the trace to align with the earliest start and latest end times
-        start_offset = (tr.stats.starttime - earliest_start) * tr.stats.sampling_rate
-        end_offset = (latest_end - tr.stats.endtime) * tr.stats.sampling_rate
-        padded_data = np.pad(tr.data, (int(start_offset), int(end_offset)),
-                             mode='constant')
-
+    
+    for tr in working_st:
+        # Call trimPad to perform datasize editing. 
+        # This will destroy all metadata.
+        paddedData = trimPad(tr, metaData['Start'], metaData['End'])
+    
         # Detrend and demean the trace data
-        padded_data = simple(padded_data) - np.mean(padded_data)
-
-        # Butterworth filter parameters
-        nyquist = 0.5 / dt
-        low = corner_l / nyquist
-        high = corner_h / nyquist
-        b, a = butter(order, [low, high], btype='band', analog=False)
-
-        # Filter the trace data
-        filtered_data = filtfilt(b, a, padded_data)
-
-  # Create a new trace with the filtered data and add it to the filtered stream
-        filtered_tr = Trace(filtered_data)
-        filtered_tr.stats.starttime = earliest_start
+        paddedData = simple(paddedData) - np.mean(paddedData)
+        
+        # Call butterworth to perform the filtering we have designed
+        filteredData = butterworth(paddedData, metaData['sr'], corner_l, 
+                                   corner_h, order)
+    
+        # Create a new trace with the filtered data and add it to the 
+        # filtered stream
+        filtered_tr = Trace(filteredData)
+        filtered_tr.stats.starttime = metaData['Start']
         filtered_st += filtered_tr
 
     return filtered_st

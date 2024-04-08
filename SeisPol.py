@@ -2,12 +2,31 @@ import os
 
 import numpy as np
 import pandas as pd
+import numpy.typing as npt
 from obspy import Stream
 from scipy.signal.windows import tukey
 from .filtermerge import filtermerge
-from .eigen_analysis import eigen_analysis
+from .eigSort import eigSort
 from .polarity import polarity
 from .dStruct import dataStruct
+
+def applyWindow(data, window) -> tuple[npt.ArrayLike,
+                                       npt.ArrayLike, npt.ArrayLike]:
+    
+    window1 = data[0, :] * window
+    window2 = data[1, :] * window
+    window3 = data[2, :] * window
+
+    return window1, window2, window3
+
+
+def computeParams(sig1, sig2, sig3):
+    
+    eVals, eVecs = eigSort(sig1, sig2, sig3)
+    dataPass = polarity(eVecs, eVals)
+    
+    return dataPass
+
 
 def analyze(st: Stream, window_size:int, window_overlap:float = 0.5, 
             scope:tuple = None, write:bool = False) -> pd.DataFrame:
@@ -46,22 +65,21 @@ def analyze(st: Stream, window_size:int, window_overlap:float = 0.5,
     working_data = np.vstack([tr.data for tr in working_signal])
 
     for i in range(numsOut):
+        start = i * step
+        end = start + window_size
+        windows = working_data[:, start:end]
+        
         try:
-            start = i * step
-            end = start + window_size
-            windows = working_data[:, start:end]
-    
-            window1 = windows[0, :] * cTW
-            window2 = windows[1, :] * cTW
-            window3 = windows[2, :] * cTW
-    
-            eVals, eVecs = eigen_analysis(window1, window2, window3)
-            dataPass = polarity(eVecs, eVals)
-            dataSet.body.iloc[i] = dataPass
+            window1, window2, window3 = applyWindow(windows, cTW)
+            dataPass = computeParams(window1, window2, window3)
+            dataSet.body.iloc[i] = dataPass.body
+            
         except ValueError:
-            pass
-        # The final portion raises an error because there aren't enough samples.
-        # Need to come up with a strategy for handling this.
+            cTW_end = tukey(windows.shape[1], 0.5)
+            window1, window2, window3 = applyWindow(windows, cTW_end)
+            dataPass = computeParams(window1, window2, window3)
+            dataSet.body.iloc[i] = dataPass.body
+            
 
     # Save the computed data to disk
     if write is True:

@@ -23,6 +23,7 @@ def compute_rectilinearity(eigs) -> float:
     
     return rectParam
 
+
 # Computes the planar polarization function
 def compute_planarity(eigs: npt.ArrayLike) -> float:
     """
@@ -40,6 +41,7 @@ def compute_planarity(eigs: npt.ArrayLike) -> float:
     planParam = 1 - ((2*eigs[2]) / (eigs[0] + eigs[1]))
     
     return planParam
+
 
 # Computes the angles of the source signal
 def compute_angles(a:float, b:float, g:float) -> float:
@@ -73,6 +75,7 @@ def compute_angles(a:float, b:float, g:float) -> float:
         azi = azi-360
         
     return inci, azi
+
     
 # Computes the Norm of a vector
 def norm(x: list[int], *, order:int = 2) -> int:
@@ -84,6 +87,7 @@ def norm(x: list[int], *, order:int = 2) -> int:
     out = sum(step)**(1/order)
     
     return out
+
 
 # Computes the direction cosines of an array of input vectors
 def dir_cosines(eigen_vectors: npt.ArrayLike) -> float:
@@ -110,11 +114,12 @@ def dir_cosines(eigen_vectors: npt.ArrayLike) -> float:
     
     return alpha, beta, gamma
 
+# Handles data organization and computation calls
 def polarity(Vecs: npt.ArrayLike, Vals: npt.ArrayLike) -> pd.Series:
     """
     Computes the polarity ratio values and solves for angles of incidence from 
     ordered eigenvalues and eigenvectors. To be used in combination with 
-    'eigen_analysis.py'
+    'eigSort.py'
 
     Parameters:
     ----------
@@ -140,8 +145,9 @@ def polarity(Vecs: npt.ArrayLike, Vals: npt.ArrayLike) -> pd.Series:
     alpha, beta, gamma = dir_cosines(Vecs)
     
     # Compute the angles from the direction cosines
-    dataPacket['Incident'], dataPacket['Azimuth']  = compute_angles(alpha,
-                                                                   beta, 
-                                                                   gamma)
+    dataPacket.body['Incident'], dataPacket.body['Azimuth']  = compute_angles(
+                                                                alpha,
+                                                                beta,
+                                                                gamma)
 
     return dataPacket
