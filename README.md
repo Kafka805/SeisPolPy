@@ -1,5 +1,4 @@
 # Description:
-Here lies the architecture of SeisPol and how it works
 
 ## SeisPol.py
 ### Inputs
@@ -17,6 +16,7 @@ Here lies the architecture of SeisPol and how it works
 | Rectilinearity   | Planarity       | Azimuth         | Incident        | Normalized Diff |
 | ---------------- | --------------- | --------------- | --------------- | --------------- |
 | np.ndarray[1, n] | np.ndarray[1,n] | np.ndarray[1,n] | np.ndarray[1,n] | np.ndarray[1,n] |
+
 Where *n* is the number of *windows* contained by the analysis *scope*. These values are the output parameters for the signal.
 
 **If write is *True***: a .csv file in the current working directory containing the dataframe
