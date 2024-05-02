@@ -19,7 +19,7 @@
 
 Where *n* is the number of *windows* contained by the analysis *scope*. These values are the output parameters for the signal.
 
-**If write is *True***: a .csv file in the current working directory containing the dataframe
+**If write is *True***: a .csv file is written to the current working directory containing the output dataframe.
 
 ### Description
 SeisPol acts as the "handler" function for the analysis. The public function is seisPol(), which takes the inputs described above. The design flow is as follows:
