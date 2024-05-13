@@ -1,4 +1,14 @@
 # Description:
+SeisPolPy is an algorithm for calculating the polarization parameters devised by Andy Jurkevics in *"Polarization analysis of three-component array data,"* 1988. 
+
+**Please note, this is a work-in-progress and may see significant overhauls in structure between versions.**
+However, the underlying algorithms will remain largely the same.
+
+## Quick Start
+1. Clone or download the repository to your device.
+2. Use the directory of SeisPol as your current working directory
+3. Create, download, or read data from a 3-component broadband seismic station as an Obspy Stream object into your python namespace
+4. Run SeisPol with your Stream object as an argument, and the necessary hyperparameters.
 
 ## SeisPol.py
 ### Inputs
