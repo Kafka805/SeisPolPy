@@ -2,7 +2,7 @@
 SeisPolPy is an algorithm for calculating the polarization parameters devised by Andy Jurkevics in *"Polarization analysis of three-component array data,"* 1988. 
 
 **Please note, this is a work-in-progress and may see significant overhauls in structure between versions.**
-However, the underlying algorithms will remain largely the same.
+However, the underlying algorithms will remain largely the same; these are undergoing unit testing but considered 90% finished. Most changes will pertain to the structure of the project to align with Python module standards.
 
 ## Quick Start
 1. Clone or download the repository to your device.
