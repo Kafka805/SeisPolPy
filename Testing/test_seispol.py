@@ -7,7 +7,9 @@ Created on Wed May  1 18:26:23 2024
 import unittest as ut
 from SeisPolPy import eigSort as eg
 from SeisPolPy import filtermerge as fm
+from SeisPolPy import polarity as po
 from numpy import vstack, linalg, sin, linspace, pi, random, fft, abs, log10
+from numpy import array
 from numpy.testing import assert_allclose
 import matplotlib.pyplot as plt
 from scipy import signal
@@ -35,9 +37,13 @@ class seisTest(ut.TestCase):
         first_case = assert_allclose(vals, vim, rtol=1e-10)
         second_case = assert_allclose(vecs, vigor, rtol=1e-10)
 
-        self.assertEqual()
+        self.assertEqual(first_case, second_case)
 
     def test_filterMerge(self):
+        
+        ## Test Butterworth subprocess
+        # The other sections are library methods or direct data manipulation.
+        # They do not need testing.
         # Set parameters
         sampling_rate = 1000  # samples per second
         duration = 10  # seconds
@@ -82,7 +88,7 @@ class seisTest(ut.TestCase):
         freq_retrieved = fft.fftfreq(len(fft_filtered), dt)
         actual_freq_response = abs(freq_retrieved)
 
-        # Compare manufactured signals and actual signals
+        # Compare manufactured signals and actual signals graphically
         plt.figure(figsize=(12, 4))
 
         plt.subplot(1, 2, 1)
@@ -100,14 +106,15 @@ class seisTest(ut.TestCase):
         plt.tight_layout()
         plt.show()
 
-        # Make assertion
-        for expected, actual in zip(
-            expected_freq_response, actual_freq_response
-        ):
+        # Compare frequency responses numerically, and make assertion
+        for expected, actual in zip(expected_freq_response,
+                                    actual_freq_response):
             self.assertAlmostEqual(expected, actual, places=4)
 
     def test_polarity(self):
-        pass
+        testVectors = array([1, 0, 0], [0, 1, 0], [0, 0, 1])
+        testCosines = po.dir_cosines(testVectors)
+        
 
     def test_dStruct(self):
         pass

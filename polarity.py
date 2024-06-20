@@ -7,7 +7,7 @@ import pandas as pd
 from .dStruct import dataStruct
 
 # Computes the rectilinear polarization factor
-def compute_rectilinearity(eigs) -> float:
+def compute_rectilinearity(eigs: npt.ArrayLike) -> float:
     """
     Parameters
     ----------
@@ -90,12 +90,16 @@ def norm(x: list[int], *, order:int = 2) -> int:
 
 
 # Computes the direction cosines of an array of input vectors
-def dir_cosines(eigen_vectors: npt.ArrayLike) -> float:
+def dir_cosines(eigen_vectors: npt.ArrayLike,
+                basis: npt.ArrayLike = None) -> float:
     """
     Parameters
     ----------
     eigen_vectors : npt.ArrayLike
         List of eigenvectors representing the analysis space.
+        
+    basis : npt.ArrayLike
+        Set of basis vectors to use in computation of the cosines.
 
     Outputs
     -------
@@ -106,11 +110,14 @@ def dir_cosines(eigen_vectors: npt.ArrayLike) -> float:
     gamma : float
         Angle defined from the X-axis.
     """
+    if basis is None:
+        basis = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
+    
     big_norm = norm(eigen_vectors[:,0])
     
-    alpha = eigen_vectors[0,0] / big_norm
-    beta = eigen_vectors[1,0] / big_norm
-    gamma = eigen_vectors[2,0] / big_norm
+    alpha = eigen_vectors[:,0]*basis[:,0] / big_norm
+    beta = eigen_vectors[:,1]*basis[:,1] / big_norm
+    gamma = eigen_vectors[:,2]*basis[:,2] / big_norm
     
     return alpha, beta, gamma
 

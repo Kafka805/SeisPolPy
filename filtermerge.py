@@ -8,9 +8,8 @@ from scipy.signal import butter, filtfilt
 
 
 # %%
-def butterworth(
-    data, dt, corner_l, corner_h, order, *, test=False
-) -> npt.ArrayLike:
+def butterworth(data, dt, corner_l, corner_h, order, *,
+                test=False) -> npt.ArrayLike:
     """
     Signal processing function that performs a butterworth filtering method on
     the input signal.

@@ -5,7 +5,7 @@ import pandas as pd
 import numpy.typing as npt
 from obspy import Stream
 from scipy.signal.windows import tukey
-from .filtermerge import filtermerge
+from .filtermerge import filterMerge
 from .eigSort import eigSort
 from .polarity import polarity
 from .dStruct import dataStruct
@@ -50,7 +50,7 @@ def seisPol(
         )
 
     # Utilize filtermerge to perform pre-processing
-    working_signal = filtermerge(st)
+    working_signal = filterMerge(st)
 
     # Construct or edit the beginning and end times for the trace
     if scope is not None:
