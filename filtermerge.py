@@ -8,7 +8,9 @@ from scipy.signal import butter, filtfilt
 
 
 # %%
-def butterworth(data, dt, corner_l, corner_h, order) -> npt.ArrayLike:
+def butterworth(
+    data, dt, corner_l, corner_h, order, *, test=False
+) -> npt.ArrayLike:
     """
     Signal processing function that performs a butterworth filtering method on
     the input signal.
@@ -19,9 +21,12 @@ def butterworth(data, dt, corner_l, corner_h, order) -> npt.ArrayLike:
     nyquist = 0.5 / dt
     low = corner_l / nyquist
     high = corner_h / nyquist
-    b, a = butter(order, [low, high], btype="band", analog=True)
+    b, a = butter(order, [low, high], btype="band", analog=False)
 
-    return filtfilt(b, a, data)
+    if test is True:
+        return b, a, filtfilt(b, a, data)
+    else:
+        return filtfilt(b, a, data)
 
 
 def trimPad(tr, start, end) -> npt.ArrayLike:
