@@ -49,11 +49,11 @@ def compute_angles(a:float, b:float, g:float) -> float:
     Parameters
     ----------
     a : float
-        Angle defined from the Z-axis
+        Direction cosine defined from the Z-axis
     b : float
-        Angle defined from the Y-axis.
+        Direction cosine defined from the Y-axis.
     g : float
-        Angle defined from the X-axis.
+        Direction cosine defined from the X-axis.
 
     Outputs
     -------
@@ -76,21 +76,9 @@ def compute_angles(a:float, b:float, g:float) -> float:
         
     return inci, azi
 
-    
-# Computes the Norm of a vector
-def norm(x: list[int], *, order:int = 2) -> int:
-    #Default is the Euclidean Norm
-    if isinstance(order,int) is False:
-        raise Exception('Please provide an integer dimension for the norm')
-    
-    step = [i**order for i in x]
-    out = sum(step)**(1/order)
-    
-    return out
-
 
 # Computes the direction cosines of an array of input vectors
-def dir_cosines(eigen_vectors: npt.ArrayLike,
+def dir_cosine(vector: npt.ArrayLike,
                 basis: npt.ArrayLike = None) -> float:
     """
     Parameters
@@ -113,11 +101,23 @@ def dir_cosines(eigen_vectors: npt.ArrayLike,
     if basis is None:
         basis = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
     
-    big_norm = norm(eigen_vectors[:,0])
+    # Computes the Norm of a vector
+    def norm(x: list[int], *, order:int = 2) -> int:
+        
+        #Default is the Euclidean Norm
+        if type(order) is not int:
+            raise Exception('Please provide an integer dimension for the norm')
+        
+        step = [i**order for i in x]
+        out = sum(step)**(1/order)
+        
+        return out
     
-    alpha = eigen_vectors[:,0]*basis[:,0] / big_norm
-    beta = eigen_vectors[:,1]*basis[:,1] / big_norm
-    gamma = eigen_vectors[:,2]*basis[:,2] / big_norm
+    vecNorm = norm(vector)
+    
+    alpha = np.dot(vector, basis[:,0]) / vecNorm
+    beta = np.dot(vector, basis[:,1]) / vecNorm
+    gamma = np.dot(vector, basis[:,2]) / vecNorm
     
     return alpha, beta, gamma
 
@@ -148,8 +148,8 @@ def polarity(Vecs: npt.ArrayLike, Vals: npt.ArrayLike) -> pd.Series:
     dataPacket.body['Planarity'] = compute_planarity(Vals)
     dataPacket.body['Normalized Diff'] = (Vals[1] - Vals[2]) / Vals[0]
 
-    # Retrieve the direction cosines
-    alpha, beta, gamma = dir_cosines(Vecs)
+    # Retrieve the direction cosines of the largest eigenvalue (P-wave)
+    alpha, beta, gamma = dir_cosine(Vecs[:,0])
     
     # Compute the angles from the direction cosines
     dataPacket.body['Incident'], dataPacket.body['Azimuth']  = compute_angles(

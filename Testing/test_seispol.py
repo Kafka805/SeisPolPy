@@ -112,12 +112,16 @@ class seisTest(ut.TestCase):
             self.assertAlmostEqual(expected, actual, places=4)
 
     def test_polarity(self):
-        testVectors = array([1, 0, 0], [0, 1, 0], [0, 0, 1])
-        testCosines = po.dir_cosines(testVectors)
+        testVectors = array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
+        x, y, z = po.dir_cosine(testVectors[:,0])
+        testCosines = [x, y, z]
+        expectation = [1, 0, 0]
         
-
+        case = assert_allclose(testCosines, expectation)
+        
+        self.assertEqual(case, None)
     def test_dStruct(self):
-        pass
+        
 
     def test_SeisPol(self):
         pass
