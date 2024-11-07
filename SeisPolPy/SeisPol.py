@@ -61,7 +61,7 @@ def seisPol(
     numsOut: int = st[0].stats.npts // step
 
     # Initialize output datastructure
-    dataSet = dataStruct(length=numsOut)
+    dataSet = dataStruct(rows=numsOut)
 
     # Construct the Tukey window envelope
     cTW = tukey(window_size, 0.5)

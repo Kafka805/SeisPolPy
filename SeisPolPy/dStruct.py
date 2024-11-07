@@ -16,7 +16,7 @@ class dataStruct:
         length (int): Integer number describing how many rows to initialize.
     """
 
-    def __init__(self, headers: list[str] = None, length: int = None):
+    def __init__(self, headers: list[str] = None, rows: int = 1):
         if headers is None:
             headers = [
                 "Rectilinearity",
@@ -26,15 +26,14 @@ class dataStruct:
                 "Normalized Diff",
             ]
         self.headers = headers
+        self.length = rows
 
-        if length is None:
-            length = 1
-        self.length = length
-
-        if length == 1:
+        # The goal of the wrapper is to be multi-modal based on the number of rows.
+        # If the user wants a single collection of labelled values, then "length"
+        if rows == 1:
             self.body = pd.Series(index=headers)
         else:
-            self.body = pd.DataFrame(columns=headers, index=range(length))
+            self.body = pd.DataFrame(columns=headers, index=range(rows))
 
     def __str__(self) -> str:
         return f"{self.body}"

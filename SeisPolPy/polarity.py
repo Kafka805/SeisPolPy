@@ -142,7 +142,7 @@ def polarity(Vecs: npt.ArrayLike, Vals: npt.ArrayLike) -> pd.Series:
     
     #Initialize output datastructure and call computation functions
     
-    dataPacket = dataStruct(length = 1)
+    dataPacket = dataStruct(rows = 1)
     
     dataPacket.body['Rectilinearity'] = compute_rectilinearity(Vals)
     dataPacket.body['Planarity'] = compute_planarity(Vals)

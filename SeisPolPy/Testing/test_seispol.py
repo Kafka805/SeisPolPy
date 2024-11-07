@@ -40,7 +40,6 @@ class seisTest(ut.TestCase):
         self.assertEqual(first_case, second_case)
 
     def test_filterMerge(self):
-        
         ## Test Butterworth subprocess
         # The other sections are library methods or direct data manipulation.
         # They do not need testing.
@@ -75,8 +74,7 @@ class seisTest(ut.TestCase):
 
         # Apply the filter and retrieve the parameters of the equation
         b, a, filtered_signal = fm.butterworth(
-            noisy_signal, dt, low, high, order, test=True
-        )
+            noisy_signal, dt, low, high, order, test=True)
 
         # Calculate expected frequency response
         fft_expected = fft.fft(expected_signal)
@@ -120,12 +118,26 @@ class seisTest(ut.TestCase):
         case = assert_allclose(testCosines, expectation)
         
         self.assertEqual(case, None)
+
     def test_dStruct(self):
-        
+        # Test Series case
+        testStructSeries = dataStruct()
+        caseA = len(testStructureSeries)
+
+        # Test DataFrame Case
+        testHeaders = [
+            "Lorem",
+            "Ipsum",
+            "Dolor",
+            "Est",
+            "Sit",
+        ]
+
+        testStructDF = dataStruct(headers = testHeaders, rows = 7)
+        caseB = len(testStructDF)
 
     def test_SeisPol(self):
         pass
-
 
 if __name__ == "__main__":
     ut.main(verbosity=0)
