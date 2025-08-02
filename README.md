@@ -1,6 +1,51 @@
-# Description:
-Here lies the architecture of SeisPol and how it works
+# SeisPolPy: Polarization Analysis of Three-Component Seismic Data
 
+![PyPI - Python Version](https://img.shields.io/badge/python-3.9+-blue.svg)
+
+SeisPolPy is a Python package for calculating seismic wave polarization parameters based on the 1988 Jurkevics method, designed for easy integration with ObsPy. This tool simplifies the process of analyzing the particle motion of seismic waves from three-component seismograms.
+
+## Key Features
+*   Calculates key polarization attributes: rectilinearity, planarity, azimuth, and incidence angle.
+*   Seamlessly integrates with ObsPy Stream objects.
+*   Includes functionality for time-domain windowing and analysis scoping.
+*   Lightweight and easy to use.
+
+## Installation
+
+Currently, SeisPolPy can be installed directly from GitHub using pip:
+
+```bash
+pip install git+https://github.com/Kafka805/SeisPolPy.git
+```
+
+## Quick Start
+
+Here is a minimal example of how to use SeisPolPy with an ObsPy Stream object.
+
+```python
+import obspy
+from seispolpy.seispolpy import seispol
+
+# 1. Load your 3-component data (example using dummy data)
+st = obspy.read() # Or your method for getting data
+
+# 2. Define analysis parameters
+window_size_samples = 128
+scope_start = st.stats.starttime + 10
+scope_end = st.stats.starttime + 60
+
+# 3. Run the polarization analysis
+polarization_df = seispol(
+    st=st,
+    window_size=window_size_samples,
+    scope=(scope_start, scope_end),
+    write=False
+)
+
+# 4. View the results
+print(polarization_df.head())
+```
+# Function Overview
 ## SeisPol.py
 ### Inputs
 - **st {Obspy.Stream}:** An Obspy Stream instance with 3 traces from the same station. Traces should be ordered st[0] == East/West, st[1] == North, st[2] == Vertical. Please ensure the following is true about your trace data for best results:
@@ -17,6 +62,7 @@ Here lies the architecture of SeisPol and how it works
 | Rectilinearity   | Planarity       | Azimuth         | Incident        | Normalized Diff |
 | ---------------- | --------------- | --------------- | --------------- | --------------- |
 | np.ndarray[1, n] | np.ndarray[1,n] | np.ndarray[1,n] | np.ndarray[1,n] | np.ndarray[1,n] |
+
 Where *n* is the number of *windows* contained by the analysis *scope*. These values are the output parameters for the signal.
 
 **If write is *True***: a .csv file in the current working directory containing the dataframe
